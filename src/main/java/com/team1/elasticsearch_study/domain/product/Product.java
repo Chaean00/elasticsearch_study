@@ -37,4 +37,8 @@ public class Product {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public ProductDocument toDocument() {
+        return new ProductDocument(id, name, price, category, createdAt, updatedAt);
+    }
 }
