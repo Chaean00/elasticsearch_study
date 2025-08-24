@@ -10,10 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Document(indexName = "products")
+@Document(indexName = "products", createIndex = false)
 @Builder
-@Setting(settingPath = "es/products-settings.json")
-@Mapping(mappingPath = "es/products-mappings.json")
 public class ProductDocument {
     @Id
     private String esId;

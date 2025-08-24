@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.elasticsearch
-    image: elasticsearch:9.1.2-nori   # 로컬 태그
+    image: elasticsearch:8.18.5-nori   # 로컬 태그
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -32,7 +32,7 @@ services:
       - dev-network
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.0
+    image: docker.elastic.co/kibana/kibana:8.18.5
     container_name: kibana
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200

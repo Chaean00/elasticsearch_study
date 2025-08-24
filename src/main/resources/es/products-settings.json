@@ -31,7 +31,8 @@
         "nori_pos_filter": {
           "type": "nori_part_of_speech",
           "stoptags": [
-            "E", "IC", "J", "MAG", "MAJ", "MM",
+            "EC","EF","EP","ETM","ETN",
+            "IC", "J", "MAG", "MAJ", "MM",
             "SP", "SSC", "SSO", "SC", "SE", "XPN",
             "XSA", "XSN", "XSV", "UNA", "NA", "VSV"
           ]
@@ -46,14 +47,10 @@
             "에", "에서", "로", "으로", "와", "과", "그리고"
           ]
         },
-        "korean_synonym": {
-          "type": "synonym",
-          "synonyms": [
-            "엘라스틱서치,elasticsearch,ES",
-            "빅데이터,대용량데이터,big data",
-            "머신러닝,기계학습,machine learning",
-            "인공지능,AI,artificial intelligence"
-          ]
+        "ngram_filter": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 3
         }
       },
       "analyzer": {
@@ -67,8 +64,7 @@
             "nori_pos_filter",
             "nori_readingform",
             "lowercase",
-            "korean_stop",
-            "korean_synonym"
+            "korean_stop"
           ]
         },
         "nori_search_analyzer": {
@@ -78,6 +74,16 @@
             "nori_pos_filter",
             "nori_readingform",
             "lowercase"
+          ]
+        },
+        "nori_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "nori_pos_filter",
+            "nori_readingform",
+            "lowercase",
+            "ngram_filter"
           ]
         }
       }
