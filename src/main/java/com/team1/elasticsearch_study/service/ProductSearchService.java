@@ -1,79 +1,98 @@
 package com.team1.elasticsearch_study.service;
 
-import com.team1.elasticsearch_study.domain.product.Product;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.team1.elasticsearch_study.domain.product.ProductDocument;
-import com.team1.elasticsearch_study.repository.ProductRepository;
 import com.team1.elasticsearch_study.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductSearchService {
-
-    private static final Logger log = LoggerFactory.getLogger(ProductSearchService.class);
-
     private final ProductSearchRepository productSearchRepository;
-    private final ProductRepository productRepository;
+    private final ElasticsearchClient client;
+    private static final String INDEX_NAME = "products";
 
+    @Transactional(readOnly = true)
+    public ProductDocument findById(Long id) {
+        return productSearchRepository.findById(id).orElse(null);
+    }
 
-    private static final int DEFAULT_BATCH_SIZE = 5000;
+    @Transactional(readOnly = true)
+    public List<ProductDocument> findAll(int pageNum) {
+        return productSearchRepository.findAll(PageRequest.of(pageNum, 10, Sort.by("id").ascending())).getContent();
+    }
 
-    @Async
-    public void indexProductsFromDatabase() {
-        log.info("데이터베이스에서 제품 색인 작업을 시작합니다. 배치 크기: {}", DEFAULT_BATCH_SIZE);
-        
-        int pageNum = 0;
-        int totalProcessed = 0;
-        
+    @Transactional(readOnly = true)
+    public List<ProductDocument> findByProductsByName(String name) {
         try {
-            while (true) {
-                Page<Product> productPage = fetchProductPage(pageNum);
-                
-                if (productPage.isEmpty()) {
-                    break;
-                }
-
-                // DB 에서 조회한 Product Entity를 ProductDocument로 변환
-                List<ProductDocument> documents = convertToDocuments(productPage.getContent());
-                productSearchRepository.saveAll(documents);
-                
-                totalProcessed += productPage.getNumberOfElements();
-                log.debug("페이지 {} 처리 완료 ({} 개 문서)", pageNum, productPage.getNumberOfElements());
-                pageNum++;
-            }
-            
-            log.info("대량 색인 작업이 성공적으로 완료되었습니다. 총 문서 수: {}, 페이지 수: {}", 
-                    totalProcessed, pageNum);
-                    
-        } catch (Exception e) {
-            log.error("페이지 {}에서 대량 색인 작업이 실패했습니다: {}", pageNum, e.getMessage(), e);
-            throw new RuntimeException("대량 색인 작업 실패", e);
+            SearchResponse<ProductDocument> response = client.search(s -> s
+                            .index(INDEX_NAME)
+                            .query(q -> q
+                                    .match(m -> m
+                                            .field("name")
+                                            .query(name)
+                                    )
+                            ),
+                    ProductDocument.class
+            );
+            log.info("response: {}", response);
+            log.info("response.hits(): {}", response.hits());
+            log.info("response.hits().hits(): {}", response.hits().hits());
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .toList();
+        } catch (IOException e) {
+            log.error("Elasticsearch 쿼리 실패: {}", name, e);
+            return Collections.emptyList();
         }
     }
 
-    private Page<Product> fetchProductPage(int pageNum) {
+    @Transactional(readOnly = true)
+    public List<ProductDocument> findByProductsPrice(BigDecimal min, BigDecimal max) {
         try {
-            PageRequest pageRequest = PageRequest.of(pageNum, DEFAULT_BATCH_SIZE, Sort.by("id").ascending());
-            return productRepository.findAll(pageRequest);
-        } catch (DataAccessException e) {
-            log.error("페이지 {}에서 데이터베이스 접근에 실패했습니다: {}", pageNum, e.getMessage());
-            throw new RuntimeException("데이터베이스에서 제품 조회 실패", e);
+            SearchResponse<ProductDocument> response = client.search(s -> s
+                            .index(INDEX_NAME)
+                            .query(q -> q
+                                    .range(r -> r
+                                            .number(n -> {
+                                                n.field("price");
+                                                if (min != null) n.gte(min.doubleValue());
+                                                if (max != null) n.lte(max.doubleValue());
+                                                return n;
+                                            }))),
+                    ProductDocument.class
+            );
+            log.info("response: {}", response);
+            log.info("response.hits(): {}", response.hits());
+            log.info("response.hits().hits(): {}", response.hits().hits());
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Elasticsearch 쿼리 실패: min={}, max={}", min, max, e);
+            return Collections.emptyList();
         }
     }
 
-    private List<ProductDocument> convertToDocuments(List<Product> products) {
-        return products.stream()
-                .map(Product::toDocument)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<ProductDocument> findByProductsCategory(String category, int pageNum) {
+
+        Pageable pageable = PageRequest.of(pageNum, 10, Sort.by("id").ascending());
+        return productSearchRepository.findByCategory(category, pageable);
     }
 }

@@ -5,7 +5,7 @@ SET search_path TO public;
 create table if not exists products (
     id bigserial primary key,
     name text not null,
-    price integer not null default 0,
+    price numeric(10, 2) not null default 0,
     category varchar(64) not null default 'DEFAULT',
     created_at timestamp not null default now(),
     updated_at timestamp not null default now()

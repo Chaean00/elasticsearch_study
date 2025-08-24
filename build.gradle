@@ -38,7 +38,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Elasticsearch
-    implementation("org.springframework.data:spring-data-elasticsearch")
+    implementation 'org.springframework.data:spring-data-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:9.1.0'
 }
 
 tasks.named('test') {

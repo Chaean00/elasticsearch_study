@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -24,8 +25,8 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Integer price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private String category;
@@ -39,6 +40,6 @@ public class Product {
     private LocalDateTime updatedAt;
 
     public ProductDocument toDocument() {
-        return new ProductDocument(id, name, price, category, createdAt, updatedAt);
+        return new ProductDocument(id.toString(), id, name, price, category, createdAt, updatedAt);
     }
 }

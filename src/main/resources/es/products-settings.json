@@ -1,0 +1,86 @@
+{
+  "index": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1,
+    "refresh_interval": "1s",
+    "analysis": {
+      "char_filter": {
+        "korean_char_filter": {
+          "type": "mapping",
+          "mappings": [
+            "１=>1", "２=>2", "３=>3", "４=>4", "５=>5",
+            "６=>6", "７=>7", "８=>8", "９=>9", "０=>0",
+            "！=>!", "？=>?", "．=>."
+          ]
+        }
+      },
+      "tokenizer": {
+        "nori_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed",
+          "user_dictionary_rules": [
+            "엘라스틱서치",
+            "빅데이터",
+            "머신러닝",
+            "딥러닝",
+            "데이터사이언스"
+          ]
+        }
+      },
+      "filter": {
+        "nori_pos_filter": {
+          "type": "nori_part_of_speech",
+          "stoptags": [
+            "E", "IC", "J", "MAG", "MAJ", "MM",
+            "SP", "SSC", "SSO", "SC", "SE", "XPN",
+            "XSA", "XSN", "XSV", "UNA", "NA", "VSV"
+          ]
+        },
+        "nori_readingform": {
+          "type": "nori_readingform"
+        },
+        "korean_stop": {
+          "type": "stop",
+          "stopwords": [
+            "의", "가", "이", "은", "는", "을", "를",
+            "에", "에서", "로", "으로", "와", "과", "그리고"
+          ]
+        },
+        "korean_synonym": {
+          "type": "synonym",
+          "synonyms": [
+            "엘라스틱서치,elasticsearch,ES",
+            "빅데이터,대용량데이터,big data",
+            "머신러닝,기계학습,machine learning",
+            "인공지능,AI,artificial intelligence"
+          ]
+        }
+      },
+      "analyzer": {
+        "nori_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "korean_char_filter"
+          ],
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "nori_pos_filter",
+            "nori_readingform",
+            "lowercase",
+            "korean_stop",
+            "korean_synonym"
+          ]
+        },
+        "nori_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "nori_pos_filter",
+            "nori_readingform",
+            "lowercase"
+          ]
+        }
+      }
+    }
+  }
+}
