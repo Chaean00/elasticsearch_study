@@ -11,7 +11,7 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
 
     // 이름으로 검색 (부분 일치)
     // findByName - 완전 일치 검색
-    List<ProductDocument> findByNameContainingIgnoreCase(String name);
+    List<ProductDocument> findByNameContaining(String name);
 
     // 가격 범위로 검색
     List<ProductDocument> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);

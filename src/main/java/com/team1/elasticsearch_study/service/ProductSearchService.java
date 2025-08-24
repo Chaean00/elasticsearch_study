@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,17 +25,14 @@ public class ProductSearchService {
     private final ElasticsearchClient client;
     private static final String INDEX_NAME = "products";
 
-    @Transactional(readOnly = true)
     public ProductDocument findById(Long id) {
         return productSearchRepository.findById(id).orElse(null);
     }
 
-    @Transactional(readOnly = true)
     public List<ProductDocument> findAll(int pageNum) {
         return productSearchRepository.findAll(PageRequest.of(pageNum, 10, Sort.by("id").ascending())).getContent();
     }
 
-    @Transactional(readOnly = true)
     public List<ProductDocument> findByProductsByName(String name) {
         try {
             log.info("이름 검색 : name={}", name);
@@ -59,7 +55,6 @@ public class ProductSearchService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ProductDocument> findByProductsByPrice(BigDecimal min, BigDecimal max) {
         try {
             log.info("가격 범위 검색 : min={}, max={}", min, max);
@@ -84,7 +79,6 @@ public class ProductSearchService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ProductDocument> findByProductsCategory(String category, int pageNum) {
 
         Pageable pageable = PageRequest.of(pageNum, 10, Sort.by("id").ascending());
