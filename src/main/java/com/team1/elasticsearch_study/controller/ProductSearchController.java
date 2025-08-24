@@ -61,7 +61,7 @@ public class ProductSearchController {
 
         if (minPrice != null && maxPrice != null) {
             log.info("가격 범위로 검색 - minPrice: {}, maxPrice: {}", minPrice, maxPrice);
-            return ResponseEntity.ok(productSearchService.findByProductsPrice(minPrice, maxPrice));
+            return ResponseEntity.ok(productSearchService.findByProductsByPrice(minPrice, maxPrice));
         }
 
         // 조건이 없으면 빈 결과 반환

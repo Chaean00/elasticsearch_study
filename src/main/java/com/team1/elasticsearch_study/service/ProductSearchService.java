@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +39,7 @@ public class ProductSearchService {
     @Transactional(readOnly = true)
     public List<ProductDocument> findByProductsByName(String name) {
         try {
+            log.info("이름 검색 : name={}", name);
             SearchResponse<ProductDocument> response = client.search(s -> s
                             .index(INDEX_NAME)
                             .query(q -> q
@@ -50,21 +50,19 @@ public class ProductSearchService {
                             ),
                     ProductDocument.class
             );
-            log.info("response: {}", response);
-            log.info("response.hits(): {}", response.hits());
-            log.info("response.hits().hits(): {}", response.hits().hits());
             return response.hits().hits().stream()
                     .map(Hit::source)
                     .toList();
         } catch (IOException e) {
             log.error("Elasticsearch 쿼리 실패: {}", name, e);
-            return Collections.emptyList();
+            throw  new RuntimeException("이름 검색에 실패하였습니다.", e);
         }
     }
 
     @Transactional(readOnly = true)
-    public List<ProductDocument> findByProductsPrice(BigDecimal min, BigDecimal max) {
+    public List<ProductDocument> findByProductsByPrice(BigDecimal min, BigDecimal max) {
         try {
+            log.info("가격 범위 검색 : min={}, max={}", min, max);
             SearchResponse<ProductDocument> response = client.search(s -> s
                             .index(INDEX_NAME)
                             .query(q -> q
@@ -77,15 +75,12 @@ public class ProductSearchService {
                                             }))),
                     ProductDocument.class
             );
-            log.info("response: {}", response);
-            log.info("response.hits(): {}", response.hits());
-            log.info("response.hits().hits(): {}", response.hits().hits());
             return response.hits().hits().stream()
                     .map(Hit::source)
                     .collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Elasticsearch 쿼리 실패: min={}, max={}", min, max, e);
-            return Collections.emptyList();
+            throw new RuntimeException("이름 검색에 실패하였습니다.", e);
         }
     }
 

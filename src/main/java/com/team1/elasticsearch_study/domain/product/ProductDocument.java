@@ -1,5 +1,6 @@
 package com.team1.elasticsearch_study.domain.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -25,8 +26,10 @@ public class ProductDocument {
     private String category;
     @Field(type = FieldType.Date, name = "created_at",
             format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @JsonProperty("created_at") // mapping 시 createdAt <-> created_at
     private LocalDateTime createdAt;
     @Field(type = FieldType.Date, name = "updated_at",
             format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @JsonProperty("updated_at") // mapping 시 updatedAt <-> updated_at
     private LocalDateTime updatedAt;
 }
