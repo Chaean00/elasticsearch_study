@@ -18,7 +18,7 @@ public class ProductDocument {
     private String esId;
     @Field(type = FieldType.Long, name = "id")
     private Long id;
-    @Field(type = FieldType.Text, name = "name", analyzer = "korean_search", searchAnalyzer = "korean_search")
+    @Field(type = FieldType.Text, name = "name")
     private String name;
     @Field(type = FieldType.Scaled_Float, name = "price", scalingFactor = 100)
     private BigDecimal price;

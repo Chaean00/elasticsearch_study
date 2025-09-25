@@ -42,4 +42,10 @@ public class Product {
     public ProductDocument toDocument() {
         return new ProductDocument(id.toString(), id, name, price, category, createdAt, updatedAt);
     }
+
+    public void update(String name, BigDecimal price, String category) {
+        if (name != null) this.name = name;
+        if (price != null) this.price = price;
+        if (category != null) this.category = category;
+    }
 }
